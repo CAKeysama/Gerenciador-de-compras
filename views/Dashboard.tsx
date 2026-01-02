@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { usePlanner } from '../context/PlannerContext';
 import { Link } from 'react-router-dom';
-import { Plus, TrendingUp, DollarSign, AlertCircle, Loader2, Sparkles, ArrowRight, Wallet } from 'lucide-react';
+import { Plus, TrendingUp, DollarSign, ArrowRight, Wallet } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { analyzeFinances } from '../services/geminiService';
 import { FinancialInsight } from '../types';
+import { IntelligentAnalysis } from '../components/IntelligentAnalysis';
+import { RotatingTips } from '../components/RotatingTips';
 
 export const Dashboard: React.FC = () => {
   const { lists, getTotalPlanned, getTotalSaved } = usePlanner();
@@ -47,10 +49,10 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-        
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+
         {/* Card 1: Planned */}
-        <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-40 md:h-48 lg:col-span-1">
+        <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-40 md:h-48">
            <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] md:text-xs font-bold tracking-wider text-gray-400 uppercase">Planejado Total</p>
@@ -69,7 +71,7 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Card 2: Saved */}
-        <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-40 md:h-48 lg:col-span-1">
+        <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between h-40 md:h-48">
            <div className="flex items-start justify-between">
               <div>
                 <p className="text-[10px] md:text-xs font-bold tracking-wider text-gray-400 uppercase">Já Guardado</p>
@@ -90,54 +92,9 @@ export const Dashboard: React.FC = () => {
            </div>
         </div>
 
-        {/* Card 3: AI Insights */}
-        <div className="bg-gradient-to-br from-indigo-50 via-white to-white p-5 md:p-6 rounded-2xl shadow-sm border border-indigo-100 flex flex-col h-auto min-h-[12rem] md:h-48 lg:col-span-2 relative group overflow-hidden">
-           <div className="absolute top-0 right-0 p-4 opacity-10">
-               <Sparkles className="w-24 h-24 text-indigo-500" />
-           </div>
-
-           <div className="flex items-center justify-between mb-4 relative z-10">
-              <span className="text-xs md:text-sm font-bold text-indigo-600 uppercase flex items-center gap-2">
-                <Sparkles className="w-4 h-4" /> Análise Inteligente
-              </span>
-              {insights.length > 0 && (
-                <button onClick={fetchInsights} className="text-[10px] md:text-xs bg-white px-2 py-1 rounded border border-indigo-100 text-indigo-600 hover:bg-indigo-50 transition-colors">
-                    Atualizar
-                </button>
-              )}
-           </div>
-           
-           <div className="flex-1 overflow-y-auto pr-2 relative z-10 custom-scrollbar">
-               {!loadingInsights && insights.length === 0 && (
-                 <div className="flex flex-col items-center justify-center h-full text-center py-2">
-                    <p className="text-indigo-900/60 text-xs md:text-sm mb-3 max-w-xs mx-auto">Dicas personalizadas baseadas nos seus padrões.</p>
-                    <button 
-                      onClick={fetchInsights}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-all shadow-md shadow-indigo-200"
-                    >
-                      Gerar Análise
-                    </button>
-                 </div>
-               )}
-               
-               {loadingInsights && (
-                 <div className="flex flex-col items-center justify-center h-full text-indigo-400">
-                   <Loader2 className="w-6 h-6 md:w-8 md:h-8 animate-spin mb-2" />
-                   <span className="text-xs md:text-sm font-medium">Analisando...</span>
-                 </div>
-               )}
-
-               {insights.length > 0 && (
-                 <div className="grid grid-cols-1 gap-2">
-                   {insights.map((insight, idx) => (
-                     <div key={idx} className={`bg-white/90 p-3 rounded-xl border ${insight.type === 'warning' ? 'border-amber-100 bg-amber-50/50' : 'border-indigo-50'} shadow-sm`}>
-                        <p className={`font-semibold text-xs mb-0.5 ${insight.type === 'warning' ? 'text-amber-700' : 'text-slate-800'}`}>{insight.title}</p>
-                        <p className="text-slate-600 text-[10px] md:text-xs leading-relaxed">{insight.message}</p>
-                     </div>
-                   ))}
-                 </div>
-               )}
-           </div>
+        {/* Card 3: Placeholder */}
+        <div className="bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-gray-100 h-40 md:h-48 hidden lg:flex items-center justify-center">
+           <p className="text-gray-400 text-sm text-center">Espaço para mais métricas</p>
         </div>
       </div>
 
@@ -203,7 +160,7 @@ export const Dashboard: React.FC = () => {
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                     <XAxis dataKey="name" tick={{fontSize: 10, fill: '#64748b'}} interval={0} height={20} tickFormatter={(val) => val.slice(0, 6) + '..'} />
                                     <YAxis tick={{fontSize: 10, fill: '#64748b'}} />
-                                    <Tooltip 
+                                    <Tooltip
                                         cursor={{fill: '#f8fafc'}}
                                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
                                         formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR')}`, '']}
@@ -223,16 +180,14 @@ export const Dashboard: React.FC = () => {
                     </div>
                 )}
             </div>
-            
-            <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl md:rounded-2xl flex items-start gap-3 md:gap-4">
-                <div className="p-1.5 bg-amber-100 rounded-full text-amber-600 mt-0.5">
-                     <AlertCircle className="w-4 h-4 md:w-5 md:h-5" />
-                </div>
-                <div>
-                    <p className="text-xs md:text-sm font-bold text-amber-900">Dica</p>
-                    <p className="text-[10px] md:text-xs text-amber-700 mt-1 leading-relaxed">Depósitos pequenos e frequentes criam grandes resultados.</p>
-                </div>
-            </div>
+
+            <RotatingTips />
+
+            <IntelligentAnalysis
+              insights={insights}
+              loadingInsights={loadingInsights}
+              onFetchInsights={fetchInsights}
+            />
         </div>
 
       </div>
