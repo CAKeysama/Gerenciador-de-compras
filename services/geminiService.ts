@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { ShoppingList, FinancialInsight } from "../types";
+import { ShoppingList, FinancialInsight, AIListPayload } from "../types";
 
 const getClient = () => {
   const apiKey = process.env.API_KEY;
@@ -62,5 +62,49 @@ export const analyzeFinances = async (lists: ShoppingList[]): Promise<FinancialI
         type: "info"
       }
     ];
+  }
+};
+
+export const generateListFromText = async (text: string): Promise<AIListPayload | null> => {
+  try {
+    const ai = getClient();
+
+    const prompt = `
+      Você é um assistente de compras inteligente. 
+      O usuário enviou este texto informal sobre o que planeja comprar: "${text}"
+
+      SUA TAREFA:
+      1. Extraia o nome da lista (seja criativo se não houver um óbvio).
+      2. Extraia o objetivo (Categoria).
+      3. Extraia todos os produtos mencionados.
+      4. IMPORTANTE: Se o usuário NÃO mencionou o preço, VOCÊ DEVE ESTIMAR um preço de mercado realista em Reais (BRL) para o produto. Não coloque 0.
+      5. Defina prioridade baseada no contexto.
+
+      Retorne APENAS um JSON com este schema:
+      {
+        "name": "string",
+        "goal": "string",
+        "products": [
+           { "name": "string", "price": number, "quantity": number, "priority": "Alta" | "Média" | "Baixa" }
+        ]
+      }
+    `;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json'
+      }
+    });
+
+    const responseText = response.text;
+    if (!responseText) return null;
+
+    return JSON.parse(responseText) as AIListPayload;
+
+  } catch (error) {
+    console.error("Gemini list generation failed", error);
+    return null;
   }
 };

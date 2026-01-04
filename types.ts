@@ -18,7 +18,8 @@ export interface Product {
   link?: string;
   store?: string;
   notes?: string;
-  priority: Priority;
+  tags: string[]; // Novo sistema de tags
+  priority: Priority; // Mantido para compatibilidade interna
   completed: boolean;
 }
 
@@ -41,4 +42,35 @@ export interface FinancialInsight {
   title: string;
   message: string;
   type: 'success' | 'warning' | 'info';
+}
+
+export interface AIListPayload {
+  name: string;
+  goal: string;
+  products: {
+    name: string;
+    price: number;
+    quantity: number;
+    tags?: string[];
+    priority: Priority;
+  }[];
+}
+
+// --- SETTINGS TYPES ---
+
+export interface SettingsState {
+  financial: {
+    currency: string;
+    closeDay: number;
+    autoSaveGoal: boolean;
+  };
+  notifications: {
+    reminderDays: number;
+    deadlineAlert: boolean;
+    aiInsights: boolean; // Renomeado de weeklyReport para algo mais genérico local
+  };
+  appearance: {
+    theme: 'light' | 'dark';
+    hideValues: boolean;
+  };
 }

@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ShoppingList, Product, Priority, Deposit } from '../types';
+import { ShoppingList, Product, Priority, Deposit, AIListPayload } from '../types';
 
 interface PlannerContextType {
   lists: ShoppingList[];
   addList: (list: Omit<ShoppingList, 'id' | 'products' | 'savedAmount' | 'depositHistory' | 'createdAt'>) => void;
+  updateList: (id: string, data: Partial<ShoppingList>) => void;
+  createCompleteList: (payload: AIListPayload) => string; // Returns ID
   deleteList: (id: string) => void;
   addProduct: (listId: string, product: Omit<Product, 'id' | 'completed'>) => void;
   toggleProduct: (listId: string, productId: string) => void;
@@ -41,6 +43,36 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
     setLists(prev => [...prev, newList]);
   };
 
+  const updateList = (id: string, data: Partial<ShoppingList>) => {
+    setLists(prev => prev.map(list => {
+      if (list.id !== id) return list;
+      return { ...list, ...data };
+    }));
+  };
+
+  const createCompleteList = (payload: AIListPayload): string => {
+    const newId = crypto.randomUUID();
+    const newList: ShoppingList = {
+      id: newId,
+      name: payload.name,
+      goal: payload.goal,
+      targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // Default 30 days
+      savedAmount: 0,
+      depositHistory: [],
+      createdAt: new Date().toISOString(),
+      products: payload.products.map(p => ({
+        ...p,
+        id: crypto.randomUUID(),
+        completed: false,
+        link: '',
+        store: '',
+        tags: p.tags || (p.priority === Priority.HIGH ? ['Alta Prioridade'] : [])
+      }))
+    };
+    setLists(prev => [...prev, newList]);
+    return newId;
+  };
+
   const deleteList = (id: string) => {
     setLists(prev => prev.filter(l => l.id !== id));
   };
@@ -48,9 +80,14 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
   const addProduct = (listId: string, productData: Omit<Product, 'id' | 'completed'>) => {
     setLists(prev => prev.map(list => {
       if (list.id !== listId) return list;
+      const tags = productData.tags || [];
+      // Retrocompatibilidade: Se user setou priority HIGH na interface antiga (se existisse), adiciona tag
+      if (productData.priority === Priority.HIGH && !tags.includes('Alta Prioridade')) {
+          tags.push('Alta Prioridade');
+      }
       return {
         ...list,
-        products: [...list.products, { ...productData, id: crypto.randomUUID(), completed: false }]
+        products: [...list.products, { ...productData, id: crypto.randomUUID(), completed: false, tags }]
       };
     }));
   };
@@ -110,7 +147,9 @@ export const PlannerProvider: React.FC<{ children: ReactNode }> = ({ children })
   return (
     <PlannerContext.Provider value={{ 
       lists, 
-      addList, 
+      addList,
+      updateList,
+      createCompleteList,
       deleteList, 
       addProduct, 
       toggleProduct, 

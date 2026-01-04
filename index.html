@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
@@ -21,6 +22,10 @@
                 600: '#16a34a',
                 700: '#15803d',
                 900: '#14532d',
+              },
+              navy: {
+                800: '#1e293b',
+                900: '#0f172a',
               }
             }
           }
@@ -30,6 +35,9 @@
     <style>
       body {
         background-color: #f8fafc; /* Slate 50 */
+      }
+      .dark body {
+        background-color: #0f172a; /* Slate 900 */
       }
       /* Custom Scrollbar for a clean look */
       ::-webkit-scrollbar {
@@ -63,6 +71,5 @@
 </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
